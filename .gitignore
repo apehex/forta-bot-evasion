@@ -1,0 +1,18 @@
+# secrets
+*.gpg
+*.key
+forta.config.json
+secrets.json
+
+# deps
+node_modules
+
+# python env
+.python-version
+poetry.lock
+pyproject.toml
+
+# temp
+dist
+__pycache__
+.pytest_cache
