@@ -9,6 +9,9 @@ import src.options
 
 # PROXY #######################################################################
 
+#TODO improve bytecode disassembly: wrong opcode
+#TODO delegatecall opcode appears after disassembly when it's not used in original sources...
+
 def is_redirecting_execution_to_another_contract(
     data: str,
     bytecode: str
@@ -16,10 +19,10 @@ def is_redirecting_execution_to_another_contract(
     """Evaluate the probability that a given contract redirects the execution to another contract."""
     __scores = []
     # uses staticcall/delegatecall/callcode
-    __scores.append(src.metrics.probabilities.indicator_to_probability(
-        indicator=src.indicators.proxy.bytecode_redirects_execution(bytecode=bytecode),
-        true_score=1, # has instructions that definitely redirect to another contract
-        false_score=0.3)) # can still use the logic of another contract without modifying its state 
+    # __scores.append(src.metrics.probabilities.indicator_to_probability(
+    #     indicator=src.indicators.proxy.bytecode_redirects_execution(bytecode=bytecode),
+    #     true_score=1, # has instructions that definitely redirect to another contract
+    #     false_score=0.3)) # can still use the logic of another contract without modifying its state 
     # list of recipients and amounts with same length
     __scores.append(src.metrics.probabilities.indicator_to_probability(
         indicator=not src.indicators.generic.bytecode_has_implementation_for_transaction_selector(bytecode=bytecode, data=data),

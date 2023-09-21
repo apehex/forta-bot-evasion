@@ -16,7 +16,10 @@ def bytecode_implements_interface(bytecode: str, interface: tuple, threshold: fl
 
 @functools.lru_cache(maxsize=128)
 def bytecode_has_implementation_for_transaction_selector(bytecode: str, data: str) -> bool:
-    return src.parsing.inputs.get_function_selector(data=data) in src.parsing.bytecode.get_function_selectors(bytecode=bytecode)
+    return (
+        not data
+        or (len(data) < 6)
+        or (src.parsing.inputs.get_function_selector(data=data) in src.parsing.bytecode.get_function_selectors(bytecode=bytecode)))
 
 # UNUSUAL CODING PATTERNS #####################################################
 

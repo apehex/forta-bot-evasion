@@ -11,10 +11,8 @@ from web3 import Web3
 from evmdasm.disassembler import EvmBytecode
 
 import src.findings
-import src.indicators.token
 import src.metrics.evasion.morphing
 import src.metrics.evasion.redirection
-import src.metrics.normal.proxy
 import src.options
 import src.stats
 import src.utils
@@ -89,13 +87,13 @@ def handle_transaction_factory(
                 receiver=__data['receiver'],
                 confidence=__scores['hidden-proxy']))
         # red pill
-        if __scores['red-pill'] >= min_confidence:
-            __findings.append(src.findings.FormatFindingRedPill(
-                chain=CHAIN_ID,
-                txhash=log.transaction.hash,
-                sender=__data['sender'],
-                receiver=__data['receiver'],
-                confidence=__scores['red-pill']))
+        # if __scores['red-pill'] >= min_confidence:
+        #     __findings.append(src.findings.FormatFindingRedPill(
+        #         chain=CHAIN_ID,
+        #         txhash=log.transaction.hash,
+        #         sender=__data['sender'],
+        #         receiver=__data['receiver'],
+        #         confidence=__scores['red-pill']))
         return __findings
 
     return __handle_transaction

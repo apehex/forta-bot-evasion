@@ -39,6 +39,9 @@ INTERFACES = {
 
 # PROXY #######################################################################
 
+#TODO improve bytecode disassembly: wrong opcode
+#TODO delegatecall opcode appears after disassembly when it's not used in original sources...
+
 @functools.lru_cache(maxsize=128)
 def bytecode_redirects_execution(bytecode: str, opcodes: tuple=DELEGATE_OPCODES) -> bool:
     return any(_o in bytecode for _o in opcodes)

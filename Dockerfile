@@ -1,5 +1,5 @@
 # Build stage: compile Python dependencies
-FROM python:3.9-alpine as builder
+FROM python:3.10-alpine as builder
 RUN apk update
 RUN apk add alpine-sdk
 RUN python3 -m pip install --upgrade pip
@@ -7,7 +7,7 @@ COPY requirements.txt ./
 RUN python3 -m pip install --user -r requirements.txt
 
 # Final stage: copy over Python dependencies and install production Node dependencies
-FROM node:12-alpine
+FROM node:20-alpine
 # this python version should match the build stage python version
 RUN apk add python3
 COPY --from=builder /root/.local /root/.local
