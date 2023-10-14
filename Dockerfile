@@ -3,8 +3,8 @@ FROM python:3.10-alpine as builder
 RUN apk update
 RUN apk add alpine-sdk
 RUN python3 -m pip install --upgrade pip
-COPY requirements.txt ./
-RUN python3 -m pip install --user -r requirements.txt
+COPY pyproject.toml ./
+RUN python3 -m pip install --user .
 
 # Final stage: copy over Python dependencies and install production Node dependencies
 FROM node:20-alpine
@@ -19,6 +19,7 @@ WORKDIR /app
 COPY ./src ./src
 COPY package*.json ./
 COPY secrets.json ./
-COPY LICENSE.md ./
+COPY .github/LICENSE.md ./
+COPY .github/README.md ./
 RUN npm ci --production
 CMD [ "npm", "run", "start:prod" ]

@@ -11,6 +11,8 @@ class EvasionType(enum.IntEnum):
     Unknown = 0
     HiddenProxy = 1
     RedPill = 2
+    Metamorphism = 3
+    EventPoisoining = 4
 
 # ALERTS ######################################################################
 
@@ -21,6 +23,10 @@ def alert_id(id) -> str:
         __alert_id = __alert_id.format(technique='HIDDEN-PROXY')
     if id == EvasionType.RedPill:
         __alert_id = __alert_id.format(technique='RED-PILL')
+    if id == EvasionType.Metamorphism:
+        __alert_id = __alert_id.format(technique='METAMORPHISM')
+    if id == EvasionType.EventPoisoining:
+        __alert_id = __alert_id.format(technique='EVENT-POISONING')
     return __alert_id
 
 # HIDDEN PROXY ################################################################

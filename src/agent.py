@@ -8,27 +8,25 @@ from forta_agent import get_json_rpc_url
 from forta_agent.transaction_event import TransactionEvent
 from web3 import Web3
 
-from evmdasm.disassembler import EvmBytecode
+import forta_toolkit.alerts
+import forta_toolkit.data
+import forta_toolkit.logging
+import forta_toolkit.metadata
+import forta_toolkit.profiling
+
+import ioseeth.metrics.evasion.morphing
+import ioseeth.metrics.evasion.redirection
 
 import src.findings
-import src.metrics.evasion.morphing
-import src.metrics.evasion.redirection
 import src.options
-import src.stats
-import src.utils
 
 # INIT ########################################################################
 
 def initialize():
     """Initialize the state variables that are tracked across tx and blocks."""
     global CHAIN_ID
-    try:
-        CHAIN_ID = int(os.environ.get('FORTA_CHAIN_ID', '') or WEB3.eth.chain_id)
-        os.environ['FORTA_CHAIN_ID'] = str(CHAIN_ID)
-        logging.info(f'set chain id to {CHAIN_ID}')
-    except Exception as e:
-        logging.error(f'error getting chain id (kept to {CHAIN_ID})')
-        raise e
+    global WEB3
+    CHAIN_ID = forta_toolkit.metadata.load_chain_id(provider=WEB3)
     return {}
 
 # METRICS #####################################################################
@@ -36,27 +34,26 @@ def initialize():
 def parse(w3: Web3, log: TransactionEvent) -> dict:
     """Extract and format all the required data."""
     __data = {
-        'sender': src.utils.format_address_with_checksum(getattr(log.transaction, 'from_', '')),
-        'receiver': src.utils.format_address_with_checksum(getattr(log.transaction, 'to', '')),
+        'sender': forta_toolkit.data.format_address_with_checksum(getattr(log.transaction, 'from_', '')),
+        'receiver': forta_toolkit.data.format_address_with_checksum(getattr(log.transaction, 'to', '')),
         'data': log.transaction.data,
-        'assembly': ''}
+        'bytecode': ''}
     # contract creation
     if not __data['receiver']:
-        __data['assembly'] = __data['data'] # use creation bytecode which contains runtime bytecode
+        __data['bytecode'] = __data['data'] # use creation bytecode which contains runtime bytecode
     # exclude transactions that are not involving a contract
-    if (len(__data['data']) >= 6): # prefix + selector
-        __assembly = EvmBytecode(w3.eth.get_code(__data['receiver'])).disassemble()
-        __data['assembly'] = __assembly.as_string
+    if (len(__data['data']) > 2): # counting the prefix
+        __data['bytecode'] = w3.eth.get_code(__data['receiver']).hex()
     return __data
 
-def score(data: str, assembly: str, **kwargs) -> dict:
+def score(data: str, bytecode: str, **kwargs) -> dict:
     """Estimate the probabilities that the contract performs evasion techniques."""
     # scores each evasion technique
     __scores = {'hidden-proxy': 0.5, 'red-pill': 0.5}
     # update scores
-    if assembly:
-        __scores['hidden-proxy'] = src.metrics.evasion.redirection.is_hidden_proxy(data=data, bytecode=assembly)
-        __scores['red-pill'] = src.metrics.evasion.morphing.is_red_pill(bytecode=assembly)
+    if bytecode:
+        __scores['hidden-proxy'] = ioseeth.metrics.evasion.redirection.is_hidden_proxy(data=data, bytecode=bytecode)
+        __scores['red-pill'] = ioseeth.metrics.evasion.morphing.is_red_pill(bytecode=bytecode)
     return __scores
 
 # SCANNER #####################################################################
@@ -68,8 +65,8 @@ def handle_transaction_factory(
 ) -> callable:
     """Setup the main handler."""
 
-    @src.utils.timeit
-    @src.stats.alert_history(size=history_size)
+    @forta_toolkit.profiling.timeit
+    @forta_toolkit.alerts.alert_history(size=history_size)
     def __handle_transaction(log: TransactionEvent) -> list:
         """Main function called on the logs gathered by the Forta network."""
         global CHAIN_ID
@@ -105,8 +102,8 @@ WEB3 = Web3(Web3.HTTPProvider(get_json_rpc_url()))
 
 # MAIN ########################################################################
 
-src.utils.setup_logger(logging.INFO)
-src.utils.load_secrets()
+forta_toolkit.logging.setup_logger(logging.INFO)
+forta_toolkit.metadata.load_secrets()
 
 # run with the default settings
 handle_transaction = handle_transaction_factory(w3=WEB3)

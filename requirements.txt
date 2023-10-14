@@ -1,3 +1,0 @@
-forta_agent>=0.1.21
-evmdasm>=0.1.10
-setuptools>=61.3.1
