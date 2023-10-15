@@ -35,7 +35,7 @@ def FormatFindingHiddenProxy(
     chain: int,
     txhash: str,
     sender: str,
-    receiver: str,
+    recipient: str,
     confidence: float,
 ) -> Finding:
     """Structure all the metadata of the transaction in a Forta "Finding" object."""
@@ -44,14 +44,14 @@ def FormatFindingHiddenProxy(
     # raise a Forta network alert
     _finding = Finding({
         'name': f'Hidden proxy',
-        'description': f'{receiver} redirects the execution to a hidden implementation contract',
+        'description': f'{recipient} redirects the execution to a hidden implementation contract',
         'alert_id': alert_id(EvasionType.HiddenProxy),
         'type': FindingType.Suspicious,
         'severity': FindingSeverity.High,
         'metadata': {
             'chain_id': str(chain),
             'from': sender,
-            'to': receiver,
+            'to': recipient,
             'implementation': '',
             'confidence': round(confidence, 1),},
         'labels': _labels
@@ -66,7 +66,7 @@ def FormatFindingRedPill(
     chain: int,
     txhash: str,
     sender: str,
-    receiver: str,
+    recipient: str,
     confidence: float,
 ) -> Finding:
     """Structure all the metadata of the transaction in a Forta "Finding" object."""
@@ -75,14 +75,14 @@ def FormatFindingRedPill(
     # raise a Forta network alert
     _finding = Finding({
         'name': f'Hidden proxy',
-        'description': f'{receiver} checks whether it is running in a simulation environment',
+        'description': f'{recipient} checks whether it is running in a simulation environment',
         'alert_id': alert_id(EvasionType.RedPill),
         'type': FindingType.Suspicious,
         'severity': FindingSeverity.High,
         'metadata': {
             'chain_id': str(chain),
             'from': sender,
-            'to': receiver,
+            'to': recipient,
             'implementation': '',
             'confidence': round(confidence, 1),},
         'labels': _labels

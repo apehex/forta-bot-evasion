@@ -1,17 +1,16 @@
 """Forta agent scanning for batched transactions."""
 
+import functools
 import logging
-import os
-import pprint
 
 from forta_agent import get_json_rpc_url
 from forta_agent.transaction_event import TransactionEvent
 from web3 import Web3
 
 import forta_toolkit.alerts
-import forta_toolkit.data
 import forta_toolkit.logging
-import forta_toolkit.metadata
+import forta_toolkit.parsing.logs
+import forta_toolkit.parsing.metadata
 import forta_toolkit.profiling
 
 import ioseeth.metrics.evasion.morphing
@@ -25,26 +24,14 @@ import src.options
 def initialize():
     """Initialize the state variables that are tracked across tx and blocks."""
     global CHAIN_ID
-    global WEB3
-    CHAIN_ID = forta_toolkit.metadata.load_chain_id(provider=WEB3)
+    global PROVIDER
+    CHAIN_ID = forta_toolkit.parsing.metadata.load_chain_id(provider=PROVIDER)
     return {}
 
 # METRICS #####################################################################
 
-def parse(w3: Web3, log: TransactionEvent) -> dict:
-    """Extract and format all the required data."""
-    __data = {
-        'sender': forta_toolkit.data.format_address_with_checksum(getattr(log.transaction, 'from_', '')),
-        'receiver': forta_toolkit.data.format_address_with_checksum(getattr(log.transaction, 'to', '')),
-        'data': log.transaction.data,
-        'bytecode': ''}
-    # contract creation
-    if not __data['receiver']:
-        __data['bytecode'] = __data['data'] # use creation bytecode which contains runtime bytecode
-    # exclude transactions that are not involving a contract
-    if (len(__data['data']) > 2): # counting the prefix
-        __data['bytecode'] = w3.eth.get_code(__data['receiver']).hex()
-    return __data
+is_hidden_proxy = functools.lru_cache(maxsize=128)(ioseeth.metrics.evasion.redirection.is_hidden_proxy)
+is_red_pill = functools.lru_cache(maxsize=128)(ioseeth.metrics.evasion.morphing.is_red_pill)
 
 def score(data: str, bytecode: str, **kwargs) -> dict:
     """Estimate the probabilities that the contract performs evasion techniques."""
@@ -52,14 +39,14 @@ def score(data: str, bytecode: str, **kwargs) -> dict:
     __scores = {'hidden-proxy': 0.5, 'red-pill': 0.5}
     # update scores
     if bytecode:
-        __scores['hidden-proxy'] = ioseeth.metrics.evasion.redirection.is_hidden_proxy(data=data, bytecode=bytecode)
-        __scores['red-pill'] = ioseeth.metrics.evasion.morphing.is_red_pill(bytecode=bytecode)
+        __scores['hidden-proxy'] = is_hidden_proxy(data=data, bytecode=bytecode)
+        __scores['red-pill'] = is_red_pill(bytecode=bytecode)
     return __scores
 
 # SCANNER #####################################################################
 
 def handle_transaction_factory(
-    w3: Web3,
+    provider: Web3,
     min_confidence: float=src.options.MIN_CONFIDENCE,
     history_size: int=src.options.ALERT_HISTORY_SIZE
 ) -> callable:
@@ -72,7 +59,7 @@ def handle_transaction_factory(
         global CHAIN_ID
         # result: list of alerts
         __findings = []
-        __data = parse(w3=w3, log=log)
+        __data = forta_toolkit.parsing.logs.parse_transaction_data(provider=provider, log=log)
         # analyse the transaction
         __scores = score(**__data)
         # hidden proxy
@@ -81,7 +68,7 @@ def handle_transaction_factory(
                 chain=CHAIN_ID,
                 txhash=log.transaction.hash,
                 sender=__data['sender'],
-                receiver=__data['receiver'],
+                recipient=__data['recipient'],
                 confidence=__scores['hidden-proxy']))
         # red pill
         # if __scores['red-pill'] >= min_confidence:
@@ -89,7 +76,7 @@ def handle_transaction_factory(
         #         chain=CHAIN_ID,
         #         txhash=log.transaction.hash,
         #         sender=__data['sender'],
-        #         receiver=__data['receiver'],
+        #         recipient=__data['recipient'],
         #         confidence=__scores['red-pill']))
         return __findings
 
@@ -98,12 +85,12 @@ def handle_transaction_factory(
 # CONSTANTS ###################################################################
 
 CHAIN_ID = 1
-WEB3 = Web3(Web3.HTTPProvider(get_json_rpc_url()))
+PROVIDER = Web3(Web3.HTTPProvider(get_json_rpc_url()))
 
 # MAIN ########################################################################
 
 forta_toolkit.logging.setup_logger(logging.INFO)
-forta_toolkit.metadata.load_secrets()
+forta_toolkit.parsing.metadata.load_secrets()
 
 # run with the default settings
-handle_transaction = handle_transaction_factory(w3=WEB3)
+handle_transaction = handle_transaction_factory(provider=PROVIDER)

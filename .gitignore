@@ -10,7 +10,6 @@ node_modules
 # python env
 .python-version
 poetry.lock
-pyproject.toml
 
 # temp
 dist

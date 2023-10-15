@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "forta-bot-evasion"
+version = "0.1.2"
+description = "Agents scanning the blockchain for malicious evasion techniques"
+authors = ["apehex <apehex@protonmail.com>"]
+readme = ".github/README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+forta-agent = "*"
+forta-toolkit = "*"
+ioseeth = "*"
+
+[tool.poetry.dev-dependencies]
+pytest = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
