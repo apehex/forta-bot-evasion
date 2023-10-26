@@ -1,25 +1,25 @@
 # Build stage: compile Python dependencies
-FROM python:3.10-alpine as builder
+FROM python:3.9-alpine as builder
+ENV PIP_ROOT_USER_ACTION=ignore
 RUN apk update
 RUN apk add alpine-sdk
 RUN python3 -m pip install --upgrade pip
-COPY pyproject.toml ./
-RUN python3 -m pip install --user .
+COPY requirements.txt ./
+RUN python3 -m pip install --user -r requirements.txt
 
 # Final stage: copy over Python dependencies and install production Node dependencies
-FROM node:20-alpine
+FROM node:12-alpine
 # this python version should match the build stage python version
-RUN apk add python3
+RUN apk add python3 py3-pip
 COPY --from=builder /root/.local /root/.local
 ENV PATH=/root/.local:$PATH
 ENV NODE_ENV=production
+ENV PIP_ROOT_USER_ACTION=ignore
 # Uncomment the following line to enable agent logging
 LABEL "network.forta.settings.agent-logs.enable"="true"
 WORKDIR /app
 COPY ./src ./src
 COPY package*.json ./
-COPY secrets.json ./
-COPY .github/LICENSE.md ./
-COPY .github/README.md ./
+COPY LICENSE.md ./
 RUN npm ci --production
 CMD [ "npm", "run", "start:prod" ]

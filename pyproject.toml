@@ -1,15 +1,15 @@
 [tool.poetry]
 name = "forta-bot-evasion"
-version = "0.1.2"
-description = "Agents scanning the blockchain for malicious evasion techniques"
+version = "0.1.13"
+description = "Bot scanning the blockchain for smart contract trying to circumvent detection"
 authors = ["apehex <apehex@protonmail.com>"]
-readme = ".github/README.md"
+readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
-forta-agent = "*"
-forta-toolkit = "*"
-ioseeth = "*"
+python = ">=3.9, <4"
+forta-agent = ">=0.1.23"
+forta-toolkit = ">=0.1.13"
+ioseeth = ">=0.1.11"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
