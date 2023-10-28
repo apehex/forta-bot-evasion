@@ -26,7 +26,7 @@ PROVIDER = Web3(Web3.HTTPProvider(get_json_rpc_url()))
 
 # INIT ########################################################################
 
-forta_toolkit.logging.setup_logger(logging.INFO)
+forta_toolkit.logging.setup_logger(logging.DEBUG)
 forta_toolkit.parsing.metadata.load_secrets()
 
 def initialize():
@@ -79,6 +79,11 @@ def handle_transaction_factory(
             # logging.debug(__scores)
             # iterate over the scan results
             for __id, __score in __scores.items():
+                if __score > 0.5:
+                    logging.debug('{hash}: {id} with probability {probability}'.format(
+                        hash=__data['hash'],
+                        id=__id,
+                        probability=__score))
                 if __score >= min_confidence:
                     __findings.append(src.findings.format_finding(
                         alert_id=__id,

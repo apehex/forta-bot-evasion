@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "forta-bot-evasion"
-version = "0.1.13"
+version = "0.1.14"
 description = "Bot scanning the blockchain for smart contract trying to circumvent detection"
 authors = ["apehex <apehex@protonmail.com>"]
 readme = "README.md"
@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = ">=3.9, <4"
 forta-agent = ">=0.1.23"
-forta-toolkit = ">=0.1.13"
+forta-toolkit = ">=0.1.14"
 ioseeth = ">=0.1.11"
 
 [tool.poetry.dev-dependencies]
