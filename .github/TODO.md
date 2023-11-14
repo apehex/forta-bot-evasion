@@ -23,6 +23,13 @@
     [ ] ERC-1155
     [ ] ERC-1967
 
+## Process
+
+[ ] analyze all the data sources in a single function
+    [ ] iterate over traces
+    [ ] iterate over event logs
+    [ ] score each evasion technique
+
 ## Stats
 
 [ ] classify all the transactions => stats
