@@ -10,14 +10,17 @@ from web3 import Web3
 
 import forta_toolkit.alerts
 import forta_toolkit.logging
+import forta_toolkit.parsing.env
+import forta_toolkit.parsing.logs
 import forta_toolkit.parsing.traces
-import forta_toolkit.parsing.metadata
 import forta_toolkit.profiling
 
+import ioseeth.indicators.events
 import ioseeth.metrics.evasion.morphing.metamorphism
 
 import src.findings
 import src.options
+import src.scoring
 
 # CONSTANTS ###################################################################
 
@@ -26,33 +29,19 @@ PROVIDER = Web3(Web3.HTTPProvider(get_json_rpc_url()))
 
 # INIT ########################################################################
 
-forta_toolkit.logging.setup_logger(logging.DEBUG)
-forta_toolkit.parsing.metadata.load_secrets()
+forta_toolkit.logging.setup_logger(logging.INFO)
+forta_toolkit.parsing.env.load_secrets()
 
 def initialize():
     """Initialize the state variables that are tracked across tx and blocks."""
     global CHAIN_ID
     global PROVIDER
-    CHAIN_ID = forta_toolkit.parsing.metadata.load_chain_id(provider=PROVIDER)
+    CHAIN_ID = forta_toolkit.parsing.env.load_chain_id(provider=PROVIDER)
     return {}
 
 # SCRAPING ####################################################################
 
 get_code = functools.lru_cache(maxsize=2048)(PROVIDER.eth.get_code)
-
-# METRICS #####################################################################
-
-is_trace_factory_contract_creation = functools.lru_cache(maxsize=128)(ioseeth.metrics.evasion.morphing.metamorphism.is_trace_factory_contract_creation)
-is_trace_mutant_contract_creation = functools.lru_cache(maxsize=128)(ioseeth.metrics.evasion.morphing.metamorphism.is_trace_mutant_contract_creation)
-
-def score(data: str, **kwargs) -> dict:
-    """Estimate the probabilities that the contract performs evasion techniques."""
-    # scores each evasion technique
-    __scores = {src.findings.EvasionType.MetamorphicFactoryDeployment: 0.5, src.findings.EvasionType.MetamorphicMutantDeployment: 0.5}
-    # update scores
-    __scores[src.findings.EvasionType.MetamorphicFactoryDeployment] = is_trace_factory_contract_creation(action=data['type'], creation_bytecode=data['input'], runtime_bytecode=data['output'])
-    __scores[src.findings.EvasionType.MetamorphicMutantDeployment] = is_trace_mutant_contract_creation(action=data['type'], creation_bytecode=data['input'], runtime_bytecode=data['output'])
-    return __scores
 
 # SCANNER #####################################################################
 
@@ -70,28 +59,32 @@ def handle_transaction_factory(
         global CHAIN_ID
         # result: list of alerts
         __findings = []
-        # iterate over each subtrace
-        for __t in log.traces:
-            # parse
-            __data = forta_toolkit.parsing.traces.parse_trace_data(trace=__t)
+        # parse all the data
+        __tx = forta_toolkit.parsing.transaction.parse_transaction_data(transaction=log.transaction)
+        __logs = [forta_toolkit.parsing.logs.parse_log_data(log=__l) for __l in log.logs]
+        __traces = [forta_toolkit.parsing.traces.parse_trace_data(trace=__t) for __t in log.traces]
+        # iterate over event logs
+        for __l in __logs:
             # analyse the transaction
-            __scores = score(data=__data)
-            # logging.debug(__scores)
+            __scores = src.scoring.score_log(log=__l)
             # iterate over the scan results
             for __id, __score in __scores.items():
-                if __score > 0.5:
-                    logging.debug('{hash}: {id} with probability {probability}'.format(
-                        hash=__data['hash'],
-                        id=__id,
-                        probability=__score))
                 if __score >= min_confidence:
-                    __findings.append(src.findings.format_finding(
-                        alert_id=__id,
-                        chain_id=CHAIN_ID,
-                        tx_hash=__data['hash'],
-                        sender=__data['from'],
-                        recipient=__data['to'],
-                        confidence=__score))
+                    # keep a trace on the node
+                    logging.info(src.findings.get_alert_description(chain_id=CHAIN_ID, alert_id=__id, transaction=__tx, log=__l, trace={}))
+                    # raise an alert
+                    __findings.append(src.findings.format_finding(chain_id=CHAIN_ID, alert_id=__id, confidence=__score, transaction=__tx, log=__l, trace={}))
+        # iterate over each subtrace
+        for __t in __traces:
+            # analyse the transaction
+            __scores = src.scoring.score_trace(trace=__t)
+            # iterate over the scan results
+            for __id, __score in __scores.items():
+                if __score >= min_confidence:
+                    # keep a trace on the node
+                    logging.info(src.findings.get_alert_description(chain_id=CHAIN_ID, alert_id=__id, transaction=__tx, log={}, trace=__t))
+                    # raise an alert
+                    __findings.append(src.findings.format_finding(chain_id=CHAIN_ID, alert_id=__id, confidence=__score, transaction=__tx, log={}, trace=__t))
         return __findings
 
     return __handle_transaction
