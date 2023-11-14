@@ -11,7 +11,7 @@ forta-agent = ">=0.1.23"
 forta-toolkit = {path = "../toolkit/", develop = true}
 ioseeth = {path = "../ioseeth/", develop = true}
 # forta-toolkit = ">=0.1.22"
-# ioseeth = ">=0.1.15"
+# ioseeth = ">=0.1.16"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"

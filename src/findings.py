@@ -20,6 +20,10 @@ class MetamorphismAlert(enum.IntEnum):
     FactoryDeployment = enum.auto()
     MutantDeployment = enum.auto()
 
+class LogicBombAlert(enum.IntEnum):
+    Unknown = 0
+    RedPill = enum.auto()
+
 # ID ##########################################################################
 
 ALERT_IDS = {
@@ -27,6 +31,7 @@ ALERT_IDS = {
     (EvasionTechnique.Metamorphism, MetamorphismAlert.FactoryDeployment): 'METAMORPHISM-FACTORY-DEPLOYMENT',
     (EvasionTechnique.Metamorphism, MetamorphismAlert.MutantDeployment): 'METAMORPHISM-MUTANT-DEPLOYMENT',
     (EvasionTechnique.EventPoisoning, ioseeth.indicators.events.EventIssue.ERC20_TransferNullAmount): 'EVENT-POISONING-TRANSFER-NULL-VALUE',
+    (EvasionTechnique.LogicBomb, LogicBombAlert.RedPill): 'LOGIC-BOMB-RED-PILL-DEPLOYMENT',
 }
 
 def get_alert_id(alert_id: tuple, **kwargs) -> str:
@@ -40,6 +45,7 @@ ALERT_NAMES = {
     (EvasionTechnique.Metamorphism, MetamorphismAlert.FactoryDeployment): 'Metamorphism: factory contract deployment',
     (EvasionTechnique.Metamorphism, MetamorphismAlert.MutantDeployment): 'Metamorphism: mutant contract deployment',
     (EvasionTechnique.EventPoisoning, ioseeth.indicators.events.EventIssue.ERC20_TransferNullAmount): 'Event poisoning: transfer of null value',
+    (EvasionTechnique.LogicBomb, LogicBombAlert.RedPill): 'Logic bomb: red-pill contract deployment',
 }
 
 def get_alert_name(alert_id: tuple, transaction: dict, log: dict, trace: dict, **kwargs) -> str:
@@ -53,13 +59,14 @@ ALERT_DESCRIPTION_PATTERNS = {
     (EvasionTechnique.Metamorphism, MetamorphismAlert.FactoryDeployment): 'Metamorphism: {sender} is deploying a factory contract at {recipient}',
     (EvasionTechnique.Metamorphism, MetamorphismAlert.MutantDeployment): 'Metamorphism: {sender} is deploying a mutant contract at {recipient}',
     (EvasionTechnique.EventPoisoning, ioseeth.indicators.events.EventIssue.ERC20_TransferNullAmount): 'Event poisoning: {sender} sent a {token} transfer of null value to {recipient}',
+    (EvasionTechnique.LogicBomb, LogicBombAlert.RedPill): 'Logic bomb: {sender} is deploying a red-pill contract at {recipient}',
 }
 
-def get_alert_description(alert_id: int, transaction: dict, log: dict, trace: dict, **kwargs) -> str:
+def get_alert_description(alert_id: tuple, transaction: dict, log: dict, trace: dict, **kwargs) -> str:
     """Generate the alert description."""
     __pattern = ALERT_DESCRIPTION_PATTERNS.get(alert_id, '')
     __description = ''
-    if alert_id[0] == EvasionTechnique.Metamorphism:
+    if alert_id[0] == EvasionTechnique.Metamorphism or alert_id[0] == EvasionTechnique.LogicBomb:
         __sender = trace.get('from', '0x')
         __recipient = trace.get('to', '0x')
         __description = __pattern.format(sender=__sender, recipient=__recipient)
@@ -117,6 +124,12 @@ def get_alert_labels(chain_id: int, alert_id: tuple, transaction: dict, log: dic
         __l = __template.copy()
         __l['label'] = 'scammer-eoa'
         __l['entity'] = transaction.get('from', '0x')
+        __labels.append(forta_agent.Label(__l))
+    # Red-pill contract
+    if alert_id == (EvasionTechnique.LogicBomb, LogicBombAlert.RedPill):
+        __l = __template.copy()
+        __l['label'] = 'red-pill-contract'
+        __l['entity'] = trace.get('to', '0x')
         __labels.append(forta_agent.Label(__l))
     return __labels
 
