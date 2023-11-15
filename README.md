@@ -14,6 +14,7 @@ The bots use the transaction traces, so they only runs on Ethereum for now.
 
 - [Alerts](#alerts)
   - [Metamorphic Contracts](#metamorphic-contracts)
+  - [Red Pill Contracts](#red-pill-contracts)
 - [Options](#options)
 - [Implementations](#implementations)
 - [Development](#development)
@@ -27,12 +28,30 @@ The bots use the transaction traces, so they only runs on Ethereum for now.
 
 ### Metamorphic Contracts
 
-The metamorphic contracts are spotted when created:
+The metamorphic contracts are spotted when created to perform static analysis on the bytecode:
 
-- `EVASION-METAMORPHISM-FACTORY-DEPLOYMENT`:
+- `METAMORPHISM-FACTORY-DEPLOYMENT`:
     - the factory address is attached as a label
-- `EVASION-METAMORPHISM-MUTANT-DEPLOYMENT`:
+- `METAMORPHISM-MUTANT-DEPLOYMENT`:
     - the mutant address is attached as a label
+
+For all the alerts:    
+
+- Type is always set to `Suspicious`
+- Severity is always `Info`
+- Metadata:
+  - `confidence`: the estimated probability of a given detection
+  - `chain_id`: the chain id
+  - `from`: the transaction sender
+  - `to`: the transaction recipient
+  - `anomaly_score`: the alert rate for this combination of bot / alert type
+
+### Red Pill Contract
+
+The red-pill contracts are spotted when created to perform static analysis on the bytecode:
+
+- `LOGIC-BOMB-RED-PILL-DEPLOYMENT`:
+    - the address of the contract is attached as a label
 
 For all the alerts:    
 

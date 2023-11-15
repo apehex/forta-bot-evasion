@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.9, <4"
-forta-agent = ">=0.1.23"
+forta-agent = ">=0.1.25"
 forta-toolkit = {path = "../toolkit/", develop = true}
 ioseeth = {path = "../ioseeth/", develop = true}
 # forta-toolkit = ">=0.1.22"
