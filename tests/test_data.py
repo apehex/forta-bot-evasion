@@ -4,37 +4,43 @@ import itertools
 import os
 import pickle
 
-import forta_agent
+# IO ##########################################################################
 
-# TOKENS ######################################################################
-
-TOKENS = {
-    'ETH': '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
-    'Тether USD (USDТ)': '0xdac17f958d2ee523a2206206994597c13d831ec7', # fake, used for phishing
-    'ETH (ETH)': '0xb23a19d28a7e9bdec030782346b0d9ace11530f5'} # fake too
+def import_data(dataset: str='transactions'):
+    __data = {}
+    for __root, _, __files in os.walk('tests/.data/{dataset}/'.format(dataset=dataset)):
+        for __filename in sorted(__files):
+            # parse the object categories
+            __parent = __root.split(os.sep)
+            __subtype = __parent[-1]
+            __type = __parent[-2]
+            __path = os.path.join(*__parent, __filename)
+            # init the dictionaries
+            if not __type in __data:
+                __data[__type] = {}
+            if not __subtype in __data[__type]:
+                __data[__type][__subtype] = []
+            # load the data
+            with open(__path, 'rb') as __f:
+                __data[__type][__subtype].append(pickle.load(__f))
+    return __data
 
 # TRANSACTIONS ################################################################
 
-TRANSACTIONS = {
-    'random': {
-        'any': []},
-    'batch': {
-        'ft': [],
-        'nft': [],
-        'native': []}, 
-    'airdrop': {
-        'ft': [],
-        'nft': []}}
+TRANSACTIONS = import_data(dataset='transactions')
 
-for _root, _, _files in os.walk('tests/.data/'):
-    for _filename in sorted(_files):
-        _parent = _root.split(os.sep)
-        _token = _parent[-1]
-        _type = _parent[-2]
-        _path = os.path.join(*_parent, _filename)
-        with open(_path, 'rb') as _f:
-            TRANSACTIONS[_type][_token].append(pickle.load(_f))
+# TRACES ######################################################################
+
+TRACES = import_data(dataset='traces')
+
+# LOGS ########################################################################
+
+LOGS = import_data(dataset='logs')
 
 # ALL #########################################################################
 
-ALL_TRANSACTIONS = tuple(itertools.chain.from_iterable([TRANSACTIONS[_type][_token] for _type in TRANSACTIONS for _token in TRANSACTIONS[_type]]))
+ALL_TRANSACTIONS = tuple(itertools.chain.from_iterable([TRANSACTIONS[__type][__subtype] for __type in TRANSACTIONS for __subtype in TRANSACTIONS[__type]]))
+
+ALL_TRACES = tuple(itertools.chain.from_iterable([TRACES[__type][__subtype] for __type in TRACES for __subtype in TRACES[__type]]))
+
+ALL_LOGS = tuple(itertools.chain.from_iterable([LOGS[__type][__subtype] for __type in LOGS for __subtype in LOGS[__type]]))
