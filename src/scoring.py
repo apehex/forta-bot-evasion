@@ -33,7 +33,7 @@ def score_log(log: dict, **kwargs) -> dict:
     # check constraints on each event
     __issues = iie.check_event_constraints(log=log)
     # alert on broken constraints
-    if __issues == iie.EventIssue.ERC20_TransferNullAmount:
-        __scores[(sf.EvasionTechnique.EventPoisoning, iie.EventIssue.ERC20_TransferNullAmount)] = 1.
+    # if __issues == iie.EventIssue.ERC20_TransferNullAmount:
+    #     __scores[(sf.EvasionTechnique.EventPoisoning, iie.EventIssue.ERC20_TransferNullAmount)] = 1.
     # update scores
     return __scores
