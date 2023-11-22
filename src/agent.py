@@ -2,7 +2,7 @@
 
 import functools
 import logging
-import pprint
+import pickle
 
 from forta_agent import get_json_rpc_url
 from forta_agent.transaction_event import TransactionEvent
