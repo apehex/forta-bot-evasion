@@ -72,13 +72,12 @@ For all the alerts:
 
 Out of all the transactions on the target contracts, the factory creation and the mutant creation are the most outstanding.
 
-The factory is detected by static analysis on its bytecode:
+The factory is detected by static analysis on its bytecode.
+And the mutant contract is detected by identifying specific "metamorphic init code" and comparing its creation code to its runtime code.
 
-![Metamorphism: factory detection][image-metamorphism-factory-detection]
-
-The mutant contract is detected by identifying specific "metamorphic init code" and comparing its creation code to its runtime code:
-
-![Metamorphism: mutant detection][image-metamorphism-mutant-detection]
+|Factory detection | Mutant detection |
+| ---------------- | ---------------- |
+|![Metamorphism: factory detection][image-metamorphism-factory-detection]|![Metamorphism: factory detection][image-metamorphism-mutant-detection]|
 
 In both cases, one of the main indicator is finding "metamorphic init code".
 This init code is a stager that is required to leverage the `CREATE2`, it looks like this:
