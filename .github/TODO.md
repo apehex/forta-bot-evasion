@@ -19,16 +19,18 @@
     [x] mutant deployment
     [ ] factory calls: get implementation address, set implementation bytecode
 [ ] event poisoning:
-    [ ] ERC-20
-    [ ] ERC-1155
-    [ ] ERC-1967
+    [x] iterate on all constraints
+    [ ] constraints:
+        [x] ERC-20
+        [ ] ERC-1155
+        [ ] ERC-1967
 
 ## Process
 
-[ ] analyze all the data sources in a single function
-    [ ] iterate over traces
-    [ ] iterate over event logs
-    [ ] score each evasion technique
+[x] analyze all the data sources in a single function
+    [x] iterate over traces
+    [x] iterate over event logs
+    [x] score each evasion technique
 
 ## Stats
 
