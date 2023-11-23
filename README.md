@@ -87,6 +87,20 @@ This init code is a stager that is required to leverage the `CREATE2`, it looks 
 5860208158601c335a63aaf10f428752fa158151803b80938091923cf3
 ```
 
+### Indicators
+
+#### Metamorphic Factory
+
+- runtime bytecode contains OPCODE `CREATE`
+- runtime bytecode contains OPCODE `CREATE2`
+- creation bytecode contains metamorphic init code
+
+#### Mutant Contract
+
+- creation bytecode is metamorphic init code
+- runtime bytecode is not included in creation bytecode
+- runtime bytecode has changed
+
 ## Red Pill Contract
 
 Red-pill contracts try to detect simulation environments by looking for default values in the global variables.
@@ -149,6 +163,13 @@ It matches chunks of HEX encoded bytecode like:
 ```
 
 The detection regex accounts for variation in the compilation process due to solidity version and optimization parameters.
+
+### Indicators
+
+- bytecode contains a comparison between `COINBASE` and `address(0x0000000000000000000000000000000000000000)`
+- bytecode contains a comparison between `PREVRANDAO` and `0`
+
+Note: depending on the EVM version the opcode `0x44` is called `DIFFICULTY` or `PREVRANDAO`.
 
 ## Scoring The Transactions
 

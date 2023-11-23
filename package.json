@@ -1,11 +1,17 @@
 {
   "name": "forta-bot-evasion",
-  "version": "0.1.43",
+  "version": "0.2.43",
   "description": "Bot scanning the blockchain for smart contract trying to circumvent detection",
   "repository": "https://github.com/apehex/forta-bots-evasion/",
-  "chainIds": [1],
+  "chainIds": [
+    1
+  ],
   "chainSettings": {
-    "default": {"shards": 4, "target": 2}},
+    "default": {
+      "shards": 4,
+      "target": 2
+    }
+  },
   "scripts": {
     "start": "npm run start:dev",
     "start:dev": "nodemon --watch src --watch forta.config.json -e py --exec \"forta-agent run\"",

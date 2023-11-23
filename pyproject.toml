@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "forta-bot-evasion"
-version = "0.1.43"
+version = "0.2.43"
 description = "Bot looking for smart contract trying to circumvent detection"
 authors = ["apehex <apehex@protonmail.com>"]
 readme = "README.md"
