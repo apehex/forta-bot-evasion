@@ -9,11 +9,14 @@ from forta_agent.transaction_event import TransactionEvent
 from web3 import Web3
 
 import forta_toolkit.alerts
+import forta_toolkit.indexing
 import forta_toolkit.logging
 import forta_toolkit.parsing.env
 import forta_toolkit.parsing.logs
 import forta_toolkit.parsing.traces
+import forta_toolkit.parsing.transaction
 import forta_toolkit.profiling
+import forta_toolkit.preprocessing
 
 import ioseeth.indicators.events
 import ioseeth.metrics.evasion.morphing.metamorphism
@@ -54,37 +57,37 @@ def handle_transaction_factory(
 
     @forta_toolkit.profiling.timeit
     @forta_toolkit.alerts.alert_history(size=history_size)
-    def __handle_transaction(log: TransactionEvent) -> list:
-        """Main function called on the logs gathered by the Forta network."""
+    @forta_toolkit.preprocessing.parse_forta_arguments
+    @forta_toolkit.indexing.serialize_io(arguments=False, results=False, filter=True, compress=False, path='.data/{alert}/{txhash}/')
+    def __handle_transaction(transaction: dict, logs: list, traces: list) -> list:
+        """Main function called by the node daemon.
+        Must be wrapped by a preprocessor to parse the composite Forta object into its constituent transaction, logs and traces."""
         global CHAIN_ID
         # result: list of alerts
         __findings = []
-        # parse all the data
-        __tx = forta_toolkit.parsing.transaction.parse_transaction_data(transaction=log.transaction)
-        __logs = [forta_toolkit.parsing.logs.parse_log_data(log=__l) for __l in log.logs]
-        __traces = [forta_toolkit.parsing.traces.parse_trace_data(trace=__t) for __t in log.traces]
         # iterate over event logs
-        for __l in __logs:
+        for __l in logs:
             # analyse the transaction
             __scores = src.scoring.score_log(log=__l)
             # iterate over the scan results
             for __id, __score in __scores.items():
                 if __score >= min_confidence:
                     # keep a trace on the node
-                    logging.info(src.findings.get_alert_description(chain_id=CHAIN_ID, alert_id=__id, transaction=__tx, log=__l, trace={}))
+                    logging.info(src.findings.get_alert_description(chain_id=CHAIN_ID, alert_id=__id, transaction=transaction, log=__l, trace={}))
                     # raise an alert
-                    __findings.append(src.findings.format_finding(chain_id=CHAIN_ID, alert_id=__id, confidence=__score, transaction=__tx, log=__l, trace={}))
+                    __findings.append(src.findings.format_finding(chain_id=CHAIN_ID, alert_id=__id, confidence=__score, transaction=transaction, log=__l, trace={}))
         # iterate over each subtrace
-        for __t in __traces:
+        for __t in traces:
             # analyse the transaction
             __scores = src.scoring.score_trace(trace=__t)
             # iterate over the scan results
             for __id, __score in __scores.items():
                 if __score >= min_confidence:
                     # keep a trace on the node
-                    logging.info(src.findings.get_alert_description(chain_id=CHAIN_ID, alert_id=__id, transaction=__tx, log={}, trace=__t))
+                    logging.info(src.findings.get_alert_description(chain_id=CHAIN_ID, alert_id=__id, transaction=transaction, log={}, trace=__t))
                     # raise an alert
-                    __findings.append(src.findings.format_finding(chain_id=CHAIN_ID, alert_id=__id, confidence=__score, transaction=__tx, log={}, trace=__t))
+                    __findings.append(src.findings.format_finding(chain_id=CHAIN_ID, alert_id=__id, confidence=__score, transaction=transaction, log={}, trace=__t))
+        # raise the alerts
         return __findings
 
     return __handle_transaction

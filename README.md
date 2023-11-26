@@ -211,7 +211,7 @@ Conflation(p_1, ..., p_N) &= \xi(p_1, ..., p_N) \\
                           &= \frac{{\prod_{i=1}}^{N} p_i}{{\prod_{i=1}}^{N} p_i + {\prod_{i=1}}^{N} (1 - p_i)}
 \end{align}$$
 
-Given a list of probabilities $\{p_i\}$ and a extra probability $p$, the conflation has the following properties:
+Given a list of probabilities $\{p_i\}$ and an extra probability $p$, the conflation has the following properties:
 
 - if $p = 0.5$ then $\xi(p_1, ..., p_N, p) = \xi(p_1, ..., p_N)$
 - if $p > 0.5$ then $\xi(p_1, ..., p_N, p) > \xi(p_1, ..., p_N)$
