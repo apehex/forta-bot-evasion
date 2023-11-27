@@ -19,9 +19,9 @@ def score_trace(trace: dict, **kwargs) -> dict:
     # scores each evasion technique
     __scores = {(sf.EvasionTechnique.Metamorphism, sf.MetamorphismAlert.FactoryDeployment): 0.5, (sf.EvasionTechnique.Metamorphism, sf.MetamorphismAlert.MutantDeployment): 0.5, (sf.EvasionTechnique.LogicBomb, sf.LogicBombAlert.RedPill): 0.5}
     # update scores
-    __scores[(sf.EvasionTechnique.Metamorphism, sf.MetamorphismAlert.FactoryDeployment)] = is_trace_factory_contract_creation(action=trace['type'], creation_bytecode=trace['input'], runtime_bytecode=trace['output'])
-    __scores[(sf.EvasionTechnique.Metamorphism, sf.MetamorphismAlert.MutantDeployment)] = is_trace_mutant_contract_creation(action=trace['type'], creation_bytecode=trace['input'], runtime_bytecode=trace['output'])
-    __scores[(sf.EvasionTechnique.LogicBomb, sf.LogicBombAlert.RedPill)] = is_trace_red_pill_contract_creation(action=trace['type'], runtime_bytecode=trace['output'])
+    __scores[(sf.EvasionTechnique.Metamorphism, sf.MetamorphismAlert.FactoryDeployment)] = is_trace_factory_contract_creation(action=trace['action_type'], creation_bytecode=trace['action_init'], runtime_bytecode=trace['result_code'])
+    __scores[(sf.EvasionTechnique.Metamorphism, sf.MetamorphismAlert.MutantDeployment)] = is_trace_mutant_contract_creation(action=trace['action_type'], creation_bytecode=trace['action_init'], runtime_bytecode=trace['result_code'])
+    __scores[(sf.EvasionTechnique.LogicBomb, sf.LogicBombAlert.RedPill)] = is_trace_red_pill_contract_creation(action=trace['action_type'], runtime_bytecode=trace['result_code'])
     return __scores
 
 # EVENT LOGS ##################################################################
@@ -33,7 +33,7 @@ def score_log(log: dict, **kwargs) -> dict:
     # check constraints on each event
     __issues = iie.check_event_constraints(log=log)
     # alert on broken constraints
-    # if __issues == iie.EventIssue.ERC20_TransferNullAmount:
-    #     __scores[(sf.EvasionTechnique.EventPoisoning, iie.EventIssue.ERC20_TransferNullAmount)] = 1.
+    if __issues == iie.EventIssue.ERC20_TransferNullAmount:
+        __scores[(sf.EvasionTechnique.EventPoisoning, iie.EventIssue.ERC20_TransferNullAmount)] = 1.
     # update scores
     return __scores

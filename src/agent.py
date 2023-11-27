@@ -9,12 +9,9 @@ from forta_agent.transaction_event import TransactionEvent
 from web3 import Web3
 
 import forta_toolkit.alerts
-import forta_toolkit.indexing
+import forta_toolkit.indexing.pickle
 import forta_toolkit.logging
 import forta_toolkit.parsing.env
-import forta_toolkit.parsing.logs
-import forta_toolkit.parsing.traces
-import forta_toolkit.parsing.transaction
 import forta_toolkit.profiling
 import forta_toolkit.preprocessing
 
@@ -32,7 +29,7 @@ PROVIDER = Web3(Web3.HTTPProvider(get_json_rpc_url()))
 
 # INIT ########################################################################
 
-forta_toolkit.logging.setup_logger(logging.INFO)
+forta_toolkit.logging.setup_logger(level=logging.INFO, version=forta_toolkit.parsing.env.get_bot_version())
 # forta_toolkit.parsing.env.load_secrets()
 
 def initialize():
@@ -58,7 +55,7 @@ def handle_transaction_factory(
     @forta_toolkit.profiling.timeit
     @forta_toolkit.alerts.alert_history(size=history_size)
     @forta_toolkit.preprocessing.parse_forta_arguments
-    @forta_toolkit.indexing.serialize_io(arguments=False, results=False, filter=True, compress=False, path='.data/{alert}/{txhash}/')
+    @forta_toolkit.indexing.pickle.serialize_io(arguments=True, results=True, filter=True, compress=False)
     def __handle_transaction(transaction: dict, logs: list, traces: list) -> list:
         """Main function called by the node daemon.
         Must be wrapped by a preprocessor to parse the composite Forta object into its constituent transaction, logs and traces."""

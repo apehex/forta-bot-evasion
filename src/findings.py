@@ -67,11 +67,11 @@ def get_alert_description(alert_id: tuple, transaction: dict, log: dict, trace: 
     __pattern = ALERT_DESCRIPTION_PATTERNS.get(alert_id, '')
     __description = ''
     if alert_id[0] == EvasionTechnique.Metamorphism or alert_id[0] == EvasionTechnique.LogicBomb:
-        __sender = trace.get('from', '0x')
-        __recipient = trace.get('to', '0x')
+        __sender = trace.get('action_from', '0x')
+        __recipient = trace.get('action_to', '0x')
         __description = __pattern.format(sender=__sender, recipient=__recipient)
     if alert_id[0] == EvasionTechnique.EventPoisoning:
-        __sender = transaction.get('from', '0x')
+        __sender = transaction.get('from_address', '0x')
         __token = log.get('address', '0x')
         __event = ioseeth.parsing.events.parse_event_log(log=log)
         __recipient = __event.get('to', '0x')
@@ -103,33 +103,33 @@ def get_alert_labels(chain_id: int, alert_id: tuple, transaction: dict, log: dic
     if alert_id == (EvasionTechnique.Metamorphism, MetamorphismAlert.FactoryDeployment):
         __l = __template.copy()
         __l['label'] = 'metamorphism-factory-contract'
-        __l['entity'] = trace.get('to', '0x')
+        __l['entity'] = trace.get('action_to', '0x')
         __labels.append(forta_agent.Label(__l))
         __l = __template.copy()
         __l['label'] = 'metamorphism-eoa'
-        __l['entity'] = transaction.get('from', '0x')
+        __l['entity'] = transaction.get('from_address', '0x')
         __labels.append(forta_agent.Label(__l))
     # mutant
     if alert_id == (EvasionTechnique.Metamorphism, MetamorphismAlert.MutantDeployment):
         __l = __template.copy()
         __l['label'] = 'metamorphism-mutant-contract'
-        __l['entity'] = trace.get('to', '0x')
+        __l['entity'] = trace.get('action_to', '0x')
         __labels.append(forta_agent.Label(__l))
         __l = __template.copy()
         __l['label'] = 'metamorphism-eoa'
-        __l['entity'] = transaction.get('from', '0x')
+        __l['entity'] = transaction.get('from_address', '0x')
         __labels.append(forta_agent.Label(__l))
     # ERC-20 null value
     if alert_id == (EvasionTechnique.EventPoisoning, ioseeth.indicators.events.EventIssue.ERC20_TransferNullAmount):
         __l = __template.copy()
         __l['label'] = 'scammer-eoa'
-        __l['entity'] = transaction.get('from', '0x')
+        __l['entity'] = transaction.get('from_address', '0x')
         __labels.append(forta_agent.Label(__l))
     # Red-pill contract
     if alert_id == (EvasionTechnique.LogicBomb, LogicBombAlert.RedPill):
         __l = __template.copy()
         __l['label'] = 'red-pill-contract'
-        __l['entity'] = trace.get('to', '0x')
+        __l['entity'] = trace.get('action_to', '0x')
         __labels.append(forta_agent.Label(__l))
     return __labels
 
