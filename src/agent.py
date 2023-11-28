@@ -9,14 +9,12 @@ from forta_agent.transaction_event import TransactionEvent
 from web3 import Web3
 
 import forta_toolkit.alerts
+import forta_toolkit.indexing.parquet
 import forta_toolkit.indexing.pickle
 import forta_toolkit.logging
 import forta_toolkit.parsing.env
 import forta_toolkit.profiling
 import forta_toolkit.preprocessing
-
-import ioseeth.indicators.events
-import ioseeth.metrics.evasion.morphing.metamorphism
 
 import src.findings
 import src.options
@@ -51,11 +49,14 @@ def handle_transaction_factory(
     history_size: int=src.options.ALERT_HISTORY_SIZE
 ) -> callable:
     """Setup the main handler."""
+    global CHAIN_ID
 
     @forta_toolkit.profiling.timeit
     @forta_toolkit.alerts.alert_history(size=history_size)
     @forta_toolkit.preprocessing.parse_forta_arguments
-    @forta_toolkit.indexing.pickle.serialize_io(arguments=True, results=True, filter=True, compress=False)
+    # @forta_toolkit.indexing.pickle.serialize_io(arguments=True, results=True, filter=True, compress=False)
+    # @forta_toolkit.indexing.parquet.export_to_database(chain_id=CHAIN_ID, dataset='contracts', path='.data/contracts/', chunksize=2**10)
+    # @forta_toolkit.indexing.parquet.import_from_database(chain_id=CHAIN_ID, dataset='contracts', path='.data/contracts/')
     def __handle_transaction(transaction: dict, logs: list, traces: list) -> list:
         """Main function called by the node daemon.
         Must be wrapped by a preprocessor to parse the composite Forta object into its constituent transaction, logs and traces."""

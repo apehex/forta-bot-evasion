@@ -4,7 +4,7 @@ import enum
 import logging
 
 import forta_agent
-import forta_toolkit
+import forta_toolkit.findings
 import ioseeth.indicators.events
 
 # TYPES #######################################################################
