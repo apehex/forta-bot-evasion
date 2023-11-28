@@ -1,17 +1,17 @@
 [tool.poetry]
 name = "forta-bot-evasion"
-version = "0.5.23"
+version = "0.5.25"
 description = "Bot looking for smart contract trying to circumvent detection"
 authors = ["apehex <apehex@protonmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9, <4"
+python = ">=3.8, <4"
 forta-agent = ">=0.1.25"
-forta-toolkit = {path = "../toolkit/", develop = true}
-ioseeth = {path = "../ioseeth/", develop = true}
-# forta-toolkit = ">=0.4.3"
-# ioseeth = ">=0.1.20"
+# forta-toolkit = {path = "../toolkit/", develop = true}
+# ioseeth = {path = "../ioseeth/", develop = true}
+forta-toolkit = ">=0.4.4"
+ioseeth = ">=0.1.21"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
