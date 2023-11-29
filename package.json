@@ -1,6 +1,6 @@
 {
   "name": "forta-bot-evasion",
-  "version": "0.5.25",
+  "version": "0.5.27",
   "description": "Bot scanning the blockchain for smart contract trying to circumvent detection",
   "repository": "https://github.com/apehex/forta-bots-evasion/",
   "chainIds": [

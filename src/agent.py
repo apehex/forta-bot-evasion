@@ -10,7 +10,6 @@ from web3 import Web3
 
 import forta_toolkit.alerts
 import forta_toolkit.indexing.parquet
-import forta_toolkit.indexing.pickle
 import forta_toolkit.logging
 import forta_toolkit.parsing.env
 import forta_toolkit.profiling
@@ -54,10 +53,9 @@ def handle_transaction_factory(
     @forta_toolkit.profiling.timeit
     @forta_toolkit.alerts.alert_history(size=history_size)
     @forta_toolkit.preprocessing.parse_forta_arguments
-    # @forta_toolkit.indexing.pickle.serialize_io(arguments=True, results=True, filter=True, compress=False)
-    # @forta_toolkit.indexing.parquet.export_to_database(chain_id=CHAIN_ID, dataset='contracts', path='.data/contracts/', chunksize=2**10)
-    # @forta_toolkit.indexing.parquet.import_from_database(chain_id=CHAIN_ID, dataset='contracts', path='.data/contracts/')
-    def __handle_transaction(transaction: dict, logs: list, traces: list) -> list:
+    @forta_toolkit.indexing.parquet.export_to_database(chain_id=CHAIN_ID, dataset='contracts', chunksize=2**12, compress=True)
+    @forta_toolkit.indexing.parquet.import_from_database(chain_id=CHAIN_ID, dataset='contracts')
+    def __handle_transaction(transaction: dict, logs: list, traces: list, dataset: 'pyarrow.dataset.FileSystemDataset', **kwargs) -> list:
         """Main function called by the node daemon.
         Must be wrapped by a preprocessor to parse the composite Forta object into its constituent transaction, logs and traces."""
         global CHAIN_ID
@@ -66,7 +64,7 @@ def handle_transaction_factory(
         # iterate over event logs
         for __l in logs:
             # analyse the transaction
-            __scores = src.scoring.score_log(log=__l)
+            __scores = src.scoring.score_log(log=__l, chain_id=CHAIN_ID)
             # iterate over the scan results
             for __id, __score in __scores.items():
                 if __score >= min_confidence:
@@ -77,7 +75,7 @@ def handle_transaction_factory(
         # iterate over each subtrace
         for __t in traces:
             # analyse the transaction
-            __scores = src.scoring.score_trace(trace=__t)
+            __scores = src.scoring.score_trace(trace=__t, chain_id=CHAIN_ID, dataset=dataset)
             # iterate over the scan results
             for __id, __score in __scores.items():
                 if __score >= min_confidence:
@@ -85,6 +83,7 @@ def handle_transaction_factory(
                     logging.info(src.findings.get_alert_description(chain_id=CHAIN_ID, alert_id=__id, transaction=transaction, log={}, trace=__t))
                     # raise an alert
                     __findings.append(src.findings.format_finding(chain_id=CHAIN_ID, alert_id=__id, confidence=__score, transaction=transaction, log={}, trace=__t))
+        # compare to historic data
         # raise the alerts
         return __findings
 
