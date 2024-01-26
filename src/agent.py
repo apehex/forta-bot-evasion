@@ -8,12 +8,12 @@ from forta_agent import get_json_rpc_url
 from forta_agent.transaction_event import TransactionEvent
 from web3 import Web3
 
-import forta_toolkit.alerts
-import forta_toolkit.indexing.parquet
-import forta_toolkit.logging
-import forta_toolkit.parsing.env
-import forta_toolkit.preprocessing
-import forta_toolkit.profiling
+import toolblocks.alerts
+import toolblocks.indexing.parquet
+import toolblocks.logging
+import toolblocks.parsing.env
+import toolblocks.preprocessing
+import toolblocks.profiling
 
 import src.findings
 import src.options
@@ -26,14 +26,14 @@ PROVIDER = Web3(Web3.HTTPProvider(get_json_rpc_url()))
 
 # INIT ########################################################################
 
-forta_toolkit.logging.setup_logger(level=logging.INFO, version=forta_toolkit.parsing.env.get_bot_version())
-# forta_toolkit.parsing.env.load_secrets()
+toolblocks.logging.setup_logger(level=logging.INFO, version=toolblocks.parsing.env.get_bot_version())
+# toolblocks.parsing.env.load_secrets()
 
 def initialize():
     """Initialize the state variables that are tracked across tx and blocks."""
     global CHAIN_ID
     global PROVIDER
-    CHAIN_ID = forta_toolkit.parsing.env.load_chain_id(provider=PROVIDER)
+    CHAIN_ID = toolblocks.parsing.env.load_chain_id(provider=PROVIDER)
     return {}
 
 # SCRAPING ####################################################################
@@ -51,11 +51,11 @@ def handle_transaction_factory(
     """Setup the main handler."""
     global CHAIN_ID
 
-    @forta_toolkit.profiling.timeit
-    @forta_toolkit.alerts.alert_history(size=history_size)
-    @forta_toolkit.preprocessing.parse_forta_arguments
-    @forta_toolkit.indexing.parquet.export_to_database(chain_id=CHAIN_ID, dataset='contracts', chunksize=chunk_size, compress=True)
-    @forta_toolkit.indexing.parquet.import_from_database(chain_id=CHAIN_ID, dataset='contracts')
+    @toolblocks.profiling.timeit
+    @toolblocks.alerts.alert_history(size=history_size)
+    @toolblocks.preprocessing.parse_forta_arguments
+    @toolblocks.indexing.parquet.export_to_database(chain_id=CHAIN_ID, dataset='contracts', chunksize=chunk_size, compress=True)
+    @toolblocks.indexing.parquet.import_from_database(chain_id=CHAIN_ID, dataset='contracts')
     def __handle_transaction(transaction: dict, logs: list, traces: list, dataset: 'pyarrow.dataset.FileSystemDataset', **kwargs) -> list:
         """Main function called by the node daemon.
         Must be wrapped by a preprocessor to parse the composite Forta object into its constituent transaction, logs and traces."""

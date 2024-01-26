@@ -3,7 +3,7 @@
 import functools
 import logging
 
-import forta_toolkit.indexing.parquet as fip
+import toolblocks.indexing.parquet as fip
 import ioseeth.indicators.events as iie
 import ioseeth.metrics.evasion.morphing.logic_bomb as imeml
 import ioseeth.metrics.evasion.morphing.metamorphism as imemm

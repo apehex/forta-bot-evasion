@@ -1,7 +1,7 @@
 """Test the formating of alerts / findings"""
 
 import forta_agent
-import forta_toolkit
+import toolblocks
 import pytest
 
 import src.findings as findings
@@ -13,8 +13,8 @@ import tests.test_data as data
 
 def test_format():
     __log = data.TRANSACTIONS['evasion']['metamorphism'][0]
-    __tx = forta_toolkit.parsing.transaction.parse_transaction_data(transaction=__log.transaction)
-    __traces = [forta_toolkit.parsing.traces.parse_trace_data(trace=__t) for __t in __log.traces]
+    __tx = toolblocks.parsing.transaction.parse_transaction_data(transaction=__log.transaction)
+    __traces = [toolblocks.parsing.traces.parse_trace_data(trace=__t) for __t in __log.traces]
     _f = findings.format_finding(
         chain_id=1,
         alert_id=(findings.EvasionTechnique.Metamorphism, findings.MetamorphismAlert.FactoryDeployment),

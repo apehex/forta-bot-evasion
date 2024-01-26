@@ -1,4 +1,4 @@
 forta_agent>=0.1.26
-forta_toolkit>=0.4.7
+toolblocks>=0.5.0
 ioseeth>=0.1.21
 setuptools>=68

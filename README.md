@@ -2,7 +2,7 @@
 
 ## Description
 
-Implementation for the detection techniques described in the [report about smart contract evasion techniques][report-web3-evasion] by the [Forta TRi][forta-threat-research-initiative].
+Implementation for the detection techniques described in the [report about smart contract evasion techniques][report-web3-evasion] by the [Apehex][github-apehex].
 
 Here, "evasion" refers to any tactic that deceives end-users or circumvents defense mechanisms.
 
@@ -58,7 +58,7 @@ The metamorphic contracts are spotted when created to perform static analysis on
 - `METAMORPHISM-MUTANT-DEPLOYMENT`:
     - the mutant address is attached as a label
 
-For all the alerts:    
+For all the alerts:
 
 - Type is always set to `Suspicious`
 - Severity is always `Info`
@@ -130,7 +130,7 @@ The red-pill contracts are spotted when created to perform static analysis on th
 - `LOGIC-BOMB-RED-PILL-DEPLOYMENT`:
     - the address of the contract is attached as a label
 
-For all the alerts:    
+For all the alerts:
 
 - Type is always set to `Suspicious`
 - Severity is always `Info`
@@ -243,7 +243,7 @@ The history size is set by `ALERT_HISTORY_SIZE`.
 
 ## Tests
 
-The bots use the libraries [`forta-toolkit`][github-apehex-toolkit] and [`ioseeth`][github-apehex-ioseeth], which come with extensive unit tests.
+The bots use the libraries [`toolblocks`][github-apehex-toolbox] and [`ioseeth`][github-apehex-ioseeth], which come with extensive unit tests.
 
 They can be run in the root directory of each of these packages with `python -m pytest`.
 
@@ -271,16 +271,16 @@ Original work by [apehex](https://github.com/apehex).
 
 Relies on the packages:
 
-- [`ioseeth`][github-apehex-ioseeth] for the detection logic 
-- [`forta-toolkit`][github-apehex-toolkit] for the data wrangling
+- [`ioseeth`][github-apehex-ioseeth] for the detection logic
+- [`toolblocks`][github-apehex-toolbox] for the data wrangling
 
 ## License
 
 See [LICENSE.md](LICENSE.md).
 
-[forta-threat-research-initiative]: https://forta.org/blog/investing-in-applied-academic-threat-research/
+[github-apehex]: https://github.com/apehex/
 [github-apehex-ioseeth]: https://github.com/apehex/web3-threat-indicators
-[github-apehex-toolkit]: https://github.com/apehex/forta-toolkit
+[github-apehex-toolbox]: https://github.com/apehex/web3-toolbox
 [image-metamorphism-factory-detection]: .github/images/metamorphism-factory-detection.png
 [image-metamorphism-mutant-detection]: .github/images/metamorphism-mutant-detection.png
 [report-web3-evasion]: https://github.com/apehex/web3-evasion-techniques/blob/main/report/web3-evasion-techniques.pdf

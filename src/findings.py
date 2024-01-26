@@ -4,7 +4,7 @@ import enum
 import logging
 
 import forta_agent
-import forta_toolkit.findings
+import toolblocks.findings
 import ioseeth.indicators.events
 
 # TYPES #######################################################################
@@ -137,7 +137,7 @@ def get_alert_labels(chain_id: int, alert_id: tuple, transaction: dict, log: dic
 
 def format_finding(**kwargs) -> forta_agent.Finding:
     """Structure all the metadata of the transaction in a Forta "Finding" object."""
-    __format_finding = forta_toolkit.findings.format_finding_factory(
+    __format_finding = toolblocks.findings.format_finding_factory(
         get_alert_id=get_alert_id,
         get_alert_name=get_alert_name,
         get_alert_description=get_alert_description,
